@@ -1,3 +1,4 @@
+import sys
 import ndjson
 from google.cloud import bigquery
 import yaml
@@ -16,10 +17,14 @@ class BigQueryTools():
         """
 
         # Read the config
-        with open(configfile) as cfg:
-            stream = cfg.read()
-
-        self._configuration = yaml.load(stream, Loader=Loader)
+        try:
+            with open(configfile) as cfg:
+                stream = cfg.read()
+            self._configuration = yaml.load(stream, Loader=Loader)
+            print(f'The config on {configfile} was loaded successfully')
+        except:
+            raise FileNotFoundError(f'The file {configfile} was not found')
+            sys.exit('Error in the config file')
 
         # Set config
         self.auth_file = self._configuration['auth']['file']
@@ -90,7 +95,7 @@ class BigQueryTools():
                 self._dataset_ref.table(self._table),
                 job_config=job_config,
             )  # API request
-            print("Starting job {}".format(load_job.job_id))
+            print(f'Starting job {load_job.job_id} and loading the {self._filename} file')
 
             try:
                 load_job.result()  # Waits for table load to complete.
