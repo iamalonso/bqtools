@@ -12,24 +12,24 @@ class BigQueryTools():
     def __init__(self, configfile: str):
         """
         Constructor
-        :param configuration:  YAML file related to the connection and the table description.
+        :param configfile:  YAML file related to the connection and the table description.
         """
 
         # Read the config
         with open(configfile) as cfg:
             stream = cfg.read()
 
-        configuration = yaml.load(stream, Loader=Loader)
+        self._configuration = yaml.load(stream, Loader=Loader)
 
         # Set config
-        self.auth_file = configuration['auth']['file']
-        self._dataset = configuration['destination']['datasetid']
-        self._table = configuration['destination']['tableid']
-        self._schema = configuration['load']['schema']
+        self.auth_file = self._configuration['auth']['file']
+        self._dataset = self._configuration['destination']['datasetid']
+        self._table = self._configuration['destination']['tableid']
+        self._schema = self._configuration['load']['schema']
 
         # File config
-        self._path = configuration['source']['local']['dir']
-        self._filename = configuration['source']['local']['filename']
+        self._path = self._configuration['source']['local']['dir']
+        self._filename = self._configuration['source']['local']['filename']
 
         # Set connection
         try:
@@ -39,11 +39,28 @@ class BigQueryTools():
 
         self._dataset_ref = self._client.dataset(self._dataset)
 
+    @property
+    def configuration(self) -> None:
+        # Todo: Documentation
+        from pprint import pprint
+        print('Getting configuration')
+        pprint(self._configuration)
 
-    def to_ndjson(self, json_data: list, mode='w', log=True):
+    @configuration.setter
+    def configuration(self, configfile: str) -> None:
+        # Todo: Documentation
+        print('Setting configuration')
+        with open(configfile) as cfg:
+            stream = cfg.read()
+
+        self._configuration = yaml.load(stream, Loader=Loader)
+
+    def to_ndjson(self, json_data: list, mode='w', log=True) -> None:
         """
         Transform a json object into a ND Json
         :param json_data: Data to being loaded
+        :param mode: The file access mode
+        :param log: Flag to enable the logging
         """
         with open(self._path + self._filename, mode) as f:
             ndjson.dump(json_data, f)
@@ -51,10 +68,9 @@ class BigQueryTools():
             if log is True:
                 print('File {} created.'.format(self._filename))
 
-    def upload_from_ndjson(self):
+    def upload_from_ndjson(self) -> None:
         """
         Upload the data to BigQuery
-        :param json_data: Data to being loaded
         """
 
         #self.to_ndjson(json_data, self._path, self._filename)
@@ -84,7 +100,7 @@ class BigQueryTools():
             except:
                 print("Error: {}".format(load_job.errors))
 
-    def streaming_data_into_a_table(self, json_data: list):
+    def streaming_data_into_a_table(self, json_data: list) -> None:
         """
         Streaming data into a table. The table must already exist and have a defined schema
         :param json_data: Data to stream into BigQuery. The format must like be a schema
