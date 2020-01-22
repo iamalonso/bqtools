@@ -46,14 +46,19 @@ class BigQueryTools():
 
     @property
     def configuration(self) -> None:
-        # Todo: Documentation
+        """
+        Print the configuration file
+        """
         from pprint import pprint
         print('Getting configuration')
         pprint(self._configuration)
 
     @configuration.setter
     def configuration(self, configfile: str) -> None:
-        # Todo: Documentation
+        """
+        :param configfile: The YAML path config file
+        :return: None
+        """
         print('Setting configuration')
         try:
             with open(configfile) as cfg:
@@ -66,7 +71,7 @@ class BigQueryTools():
 
     def to_ndjson(self, json_data: list, mode='w', log=True) -> None:
         """
-        Transform a json object into a ND Json
+        Transform a json object into a NDJSON
         :param json_data: Data to being loaded
         :param mode: The file access mode
         :param log: Flag to enable the logging
