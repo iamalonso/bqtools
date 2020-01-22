@@ -99,9 +99,9 @@ class BigQueryTools():
 
             try:
                 load_job.result()  # Waits for table load to complete.
-                print("Job finished.")
-                destination_table = self._client.get_table(self._dataset_ref.table(self._table))
-                print("Loaded {} rows.".format(destination_table.num_rows))
+                print("Job finished")
+                #destination_table = self._client.get_table(self._dataset_ref.table(self._table))
+                print(f'Loaded {load_job.output_rows} rows')
             except:
                 print("Error: {}".format(load_job.errors))
 
