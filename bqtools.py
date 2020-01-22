@@ -1,3 +1,4 @@
+import sys
 import ndjson
 from google.cloud import bigquery
 import yaml
@@ -16,10 +17,14 @@ class BigQueryTools():
         """
 
         # Read the config
-        with open(configfile) as cfg:
-            stream = cfg.read()
-
-        self._configuration = yaml.load(stream, Loader=Loader)
+        try:
+            with open(configfile) as cfg:
+                stream = cfg.read()
+            self._configuration = yaml.load(stream, Loader=Loader)
+            print(f'The config on {configfile} was loaded successfully')
+        except:
+            raise FileNotFoundError(f'The file {configfile} was not found')
+            sys.exit('Error in the config file')
 
         # Set config
         self.auth_file = self._configuration['auth']['file']
@@ -41,23 +46,32 @@ class BigQueryTools():
 
     @property
     def configuration(self) -> None:
-        # Todo: Documentation
+        """
+        Print the configuration file
+        """
         from pprint import pprint
         print('Getting configuration')
         pprint(self._configuration)
 
     @configuration.setter
     def configuration(self, configfile: str) -> None:
-        # Todo: Documentation
+        """
+        :param configfile: The YAML path config file
+        :return: None
+        """
         print('Setting configuration')
-        with open(configfile) as cfg:
-            stream = cfg.read()
-
-        self._configuration = yaml.load(stream, Loader=Loader)
+        try:
+            with open(configfile) as cfg:
+                stream = cfg.read()
+            self._configuration = yaml.load(stream, Loader=Loader)
+            print(f'The config on {configfile} was loaded successfully')
+        except:
+            raise FileNotFoundError(f'The file {configfile} was not found')
+            sys.exit('Error in the config file')
 
     def to_ndjson(self, json_data: list, mode='w', log=True) -> None:
         """
-        Transform a json object into a ND Json
+        Transform a json object into a NDJSON
         :param json_data: Data to being loaded
         :param mode: The file access mode
         :param log: Flag to enable the logging
@@ -90,13 +104,13 @@ class BigQueryTools():
                 self._dataset_ref.table(self._table),
                 job_config=job_config,
             )  # API request
-            print("Starting job {}".format(load_job.job_id))
+            print(f'Starting job {load_job.job_id} and loading the {self._filename} file')
 
             try:
                 load_job.result()  # Waits for table load to complete.
-                print("Job finished.")
-                destination_table = self._client.get_table(self._dataset_ref.table(self._table))
-                print("Loaded {} rows.".format(destination_table.num_rows))
+                print("Job finished")
+                #destination_table = self._client.get_table(self._dataset_ref.table(self._table))
+                print(f'Loaded {load_job.output_rows} rows')
             except:
                 print("Error: {}".format(load_job.errors))
 
