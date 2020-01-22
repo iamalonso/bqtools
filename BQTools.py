@@ -55,10 +55,14 @@ class BigQueryTools():
     def configuration(self, configfile: str) -> None:
         # Todo: Documentation
         print('Setting configuration')
-        with open(configfile) as cfg:
-            stream = cfg.read()
-
-        self._configuration = yaml.load(stream, Loader=Loader)
+        try:
+            with open(configfile) as cfg:
+                stream = cfg.read()
+            self._configuration = yaml.load(stream, Loader=Loader)
+            print(f'The config on {configfile} was loaded successfully')
+        except:
+            raise FileNotFoundError(f'The file {configfile} was not found')
+            sys.exit('Error in the config file')
 
     def to_ndjson(self, json_data: list, mode='w', log=True) -> None:
         """
